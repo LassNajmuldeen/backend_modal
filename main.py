@@ -43,3 +43,15 @@ class Model:
         )
 
         self.pipe.to("cuda")
+
+    @modal.web_endpoint()
+    def generate(self, request: Request, prompt: str = Query(..., description="The prompt for image generation")):
+
+        image = self.pipe(prompt, num_inference_steps=1, guidance_scale=0.0).images[0]
+
+        buffer = io.BytesIO()
+        image.save(buffer, format="JPEG")
+
+        # Return the image or convert to a suitable response
+        return Response(content=buffer.getvalue(), media_type="image/jpg")
+
